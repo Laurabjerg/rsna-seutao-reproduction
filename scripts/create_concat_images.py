@@ -1,4 +1,5 @@
 import argparse
+import os
 from pathlib import Path
 import pandas as pd
 import cv2
@@ -32,20 +33,47 @@ def build_concat(df: pd.DataFrame, png_dir: Path, out_dir: Path):
             merged = cv2.resize(merged, (256, 256))
             cv2.imwrite(str(out_dir / fname), merged)
 
+def load_config():
+    """Load config.env and expand variables."""
+    config_path = Path(os.getcwd()) / "config.env"
+    if not config_path.exists():
+        return {}
+    env = {}
+    for line in config_path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        env[key.strip()] = value.strip()
+    env["PROJECT_ROOT"] = str(Path(os.getcwd()))
+    for _ in range(10):
+        changed = False
+        for k in list(env.keys()):
+            for k2, v2 in env.items():
+                token = "${" + k2 + "}"
+                if token in env[k]:
+                    env[k] = env[k].replace(token, v2)
+                    changed = True
+        if not changed:
+            break
+    return env
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", required=True)
     args = parser.parse_args()
 
     repo_root = Path(args.repo_root)
+    cfg = load_config()
+
     stage1_csv = repo_root / "2DNet" / "data" / "stage1_train_cls.csv"
     stage2_csv = repo_root / "2DNet" / "data" / "stage2_test_cls.csv"
 
-    train_png = repo_root / "2DNet" / "train_png"
-    test_png = repo_root / "2DNet" / "test_png"
+    train_png = Path(cfg.get("RSNA_TRAIN_PNG_DIR", str(repo_root / "2DNet" / "train_png")))
+    test_png = Path(cfg.get("RSNA_TEST_PNG_DIR", str(repo_root / "2DNet" / "test_png")))
 
-    train_out = repo_root / "2DNet" / "train_concat_3images_256"
-    test_out = repo_root / "2DNet" / "stage2_test_concat_3images"
+    train_out = Path(cfg.get("RSNA_CONCAT_TRAIN_DIR", str(repo_root / "2DNet" / "train_concat_3images_256")))
+    test_out = Path(cfg.get("RSNA_CONCAT_TEST_DIR", str(repo_root / "2DNet" / "stage2_test_concat_3images")))
 
     df1 = pd.read_csv(stage1_csv)
     df2 = pd.read_csv(stage2_csv)

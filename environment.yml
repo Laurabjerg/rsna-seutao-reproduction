@@ -25,4 +25,5 @@ dependencies:
       - pretrainedmodels==0.7.4
       - efficientnet-pytorch==0.7.1
       - gdown==5.2.0
+      - kagglehub>=0.3.0
       - kaggle==1.6.17

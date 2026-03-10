@@ -36,19 +36,31 @@ for k in list(env.keys()):
 
 repo_dir = Path(env["SEUTAO_REPO_DIR"])
 
+train_png = env.get("RSNA_TRAIN_PNG_DIR", str(repo_dir / "2DNet" / "train_png"))
+test_png = env.get("RSNA_TEST_PNG_DIR", str(repo_dir / "2DNet" / "test_png"))
+concat_train = env.get("RSNA_CONCAT_TRAIN_DIR", str(repo_dir / "2DNet" / "train_concat_3images_256"))
+concat_test = env.get("RSNA_CONCAT_TEST_DIR", str(repo_dir / "2DNet" / "stage2_test_concat_3images"))
+
 # Patch 2D settings.py
 settings_2d = repo_dir / "2DNet" / "src" / "settings.py"
 settings_2d.write_text(
-    "train_png_dir = r'" + str(repo_dir / "2DNet" / "train_png") + "/'\n"
-    "test_png_dir = r'" + str(repo_dir / "2DNet" / "test_png") + "/'\n"
+    "train_png_dir = r'" + train_png + "/'\n"
+    "test_png_dir = r'" + test_png + "/'\n"
+    "concat_train_dir = r'" + concat_train + "/'\n"
+    "concat_test_dir = r'" + concat_test + "/'\n"
 )
 
 # Patch SequenceModel/settings.py
+seq_csv = env.get("SEQUENCE_CSV_ROOT", str(repo_dir / "SequenceModel" / "csv"))
+seq_fea = env.get("SEQUENCE_FEATURE_ROOT", str(repo_dir / "SequenceModel" / "features"))
+seq_out = env.get("SEQUENCE_FINAL_OUTPUT_ROOT", str(repo_dir / "FinalSubmission"))
+
 seq_settings = repo_dir / "SequenceModel" / "settings.py"
 seq_settings.write_text(
-    "csv_root = r'" + str(repo_dir / "SequenceModel" / "csv") + "'\n"
-    "feature_path = r'" + str(repo_dir / "SequenceModel" / "features") + "'\n"
-    "final_output_path = r'" + str(repo_dir / "FinalSubmission") + "'\n"
+    "import os\n"
+    "csv_root = r'" + seq_csv + "'\n"
+    "feature_path = r'" + seq_fea + "'\n"
+    "final_output_path = r'" + seq_out + "'\n"
 )
 
 # Patch hardcoded concat paths in predict.py
@@ -58,8 +70,8 @@ text = predict_py.read_text()
 old_train = "/home1/kaggle_rsna2019/process/train_concat_3images_256/"
 old_test = "/home1/kaggle_rsna2019/process/stage2_test_concat_3images/"
 
-new_train = str(repo_dir / "2DNet" / "train_concat_3images_256") + "/"
-new_test = str(repo_dir / "2DNet" / "stage2_test_concat_3images") + "/"
+new_train = concat_train + "/"
+new_test = concat_test + "/"
 
 text = text.replace(old_train, new_train)
 text = text.replace(old_test, new_test)

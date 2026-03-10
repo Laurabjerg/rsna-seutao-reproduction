@@ -1,10 +1,11 @@
 from pathlib import Path
 import os
+import sys
 
 PROJECT_ROOT = Path(os.getcwd())
 config_path = PROJECT_ROOT / "config.env"
 if not config_path.exists():
-    raise FileNotFoundError("Mangler config.env")
+    raise FileNotFoundError("Mangler config.env – kør: cp config.env.example config.env")
 
 def load_env(path: Path):
     env = {}
@@ -34,6 +35,7 @@ env["PROJECT_ROOT"] = str(PROJECT_ROOT)
 for k in list(env.keys()):
     env[k] = expand(env[k], env)
 
+# --- Tjek config-nøgler ---
 required_keys = [
     "SEUTAO_REPO_DIR",
     "DOWNLOAD_DIR",
@@ -48,18 +50,13 @@ for key in required_keys:
     if key not in env or not env[key]:
         raise RuntimeError(f"Mangler env-var i config.env: {key}")
 
-required_paths = [
-    Path(env["SEUTAO_REPO_DIR"]),
-    Path(env["RSNA_STAGE1_TRAIN_DIR"]),
-    Path(env["RSNA_STAGE1_TEST_DIR"]),
-    Path(env["RSNA_STAGE2_TEST_DIR"]),
-]
-
-for p in required_paths:
-    if not p.exists():
-        raise FileNotFoundError(f"Mangler path: {p}")
-
+# --- Tjek SeuTao repo ---
 repo_dir = Path(env["SEUTAO_REPO_DIR"])
+if not repo_dir.exists():
+    print(f"[WARN] SeuTao repo ikke fundet: {repo_dir}")
+    print("       Kør 'bash download_all.sh' først.")
+    sys.exit(0)
+
 must_exist = [
     repo_dir / "2DNet" / "src" / "prepare_data.py",
     repo_dir / "2DNet" / "src" / "predict.py",
@@ -69,20 +66,27 @@ for p in must_exist:
     if not p.exists():
         raise FileNotFoundError(f"Mangler repo-fil: {p}")
 
+# --- Tjek DICOM-data (kun warning, ikke fejl – downloades af pipeline) ---
+for key in ["RSNA_STAGE1_TRAIN_DIR", "RSNA_STAGE1_TEST_DIR", "RSNA_STAGE2_TEST_DIR"]:
+    p = Path(env[key])
+    if not p.exists():
+        print(f"[WARN] DICOM-mappe mangler: {p}")
+        print(f"       Kør 'bash download_all.sh' for at downloade fra Kaggle.")
+
+# --- Tjek downloads (kun warning) ---
 aux_dir = Path(env["AUX_DATA_DIR"])
 pre_dir = Path(env["PRETRAIN_DIR"])
 
 expected_downloads = [
     aux_dir / "data.zip",
     aux_dir / "csv.zip",
-    pre_dir / "densenet121_512",
-    pre_dir / "densenet169_256",
-    pre_dir / "seresnext101_256",
 ]
 for p in expected_downloads:
     if not p.exists():
-        raise FileNotFoundError(f"Mangler forventet download: {p}")
+        print(f"[WARN] Mangler download: {p}")
+        print(f"       Kør 'bash download_all.sh' for at downloade.")
 
+# --- Tjek torch ---
 try:
     import torch
     print(f"torch ok: {torch.__version__}")
@@ -90,4 +94,4 @@ try:
 except Exception as e:
     raise RuntimeError(f"Torch import fejlede: {e}")
 
-print("Alle setup-tjek er bestået.")
+print("Setup-tjek bestået.")

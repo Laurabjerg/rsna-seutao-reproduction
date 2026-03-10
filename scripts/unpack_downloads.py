@@ -53,6 +53,7 @@ repo_dir = Path(env["SEUTAO_REPO_DIR"])
 
 data_zip = aux_dir / "data.zip"
 csv_zip = aux_dir / "csv.zip"
+feature_zip = aux_dir / "feature_samples.zip"
 
 if data_zip.exists():
     target = repo_dir / "2DNet" / "data"
@@ -68,29 +69,31 @@ if csv_zip.exists():
 else:
     print(f"[warn] Mangler {csv_zip}")
 
-mapping = {
-    "densenet121_512": "DenseNet121_change_avg_256",
-    "densenet169_256": "DenseNet169_change_avg_256",
-    "seresnext101_256": "se_resnext101_32x4d_256",
+if feature_zip.exists():
+    target = repo_dir / "SequenceModel" / "features"
+    print(f"[unzip] {feature_zip} -> {target}")
+    unzip_to(feature_zip, target)
+else:
+    print(f"[warn] Mangler {feature_zip}")
+
+# Udpak pretrained model zip-filer (hvis de er zip-arkiver)
+pretrained_zips = {
+    "densenet121_512": pretrain_dir / "densenet121_512.zip",
+    "densenet169_256": pretrain_dir / "densenet169_256.zip",
+    "seresnext101_256": pretrain_dir / "seresnext101_256.zip",
 }
 
-for src_name, dst_name in mapping.items():
-    src = pretrain_dir / src_name
-    dst = repo_dir / "2DNet" / dst_name
-
-    if not src.exists():
-        print(f"[warn] Mangler pretrained mappe: {src}")
+for name, zip_path in pretrained_zips.items():
+    target = pretrain_dir / name
+    if target.exists():
+        print(f"[skip] {target} findes allerede")
         continue
-
-    if dst.exists():
-        print(f"[skip] {dst} findes allerede")
-        continue
-
-    if src.is_dir():
-        ckpt_dir = find_checkpoint_dir(src) or src
-        print(f"[copy] {ckpt_dir} -> {dst}")
-        shutil.copytree(ckpt_dir, dst)
-    else:
-        print(f"[warn] Forventede mappe, men fik fil: {src}")
+    if zip_path.exists():
+        print(f"[unzip] {zip_path} -> {target}")
+        try:
+            unzip_to(zip_path, target)
+        except zipfile.BadZipFile:
+            # Filen er muligvis allerede en mappe eller et enkelt checkpoint
+            print(f"[warn] {zip_path} er ikke en gyldig zip – springer over")
 
 print("Udpakning afsluttet.")

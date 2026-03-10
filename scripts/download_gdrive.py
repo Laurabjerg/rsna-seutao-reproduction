@@ -7,9 +7,10 @@ import sys
 FILES = [
     ("data.zip", "1buISR_b3HQDU4KeNc_DmvKTYJ1gvj5-3", "aux"),
     ("csv.zip", "1qYi4k-DuOLJmyZ7uYYrnomU2U7MrYRBV", "aux"),
-    ("seresnext101_256x256", "18Py5eW1E4hSbTT6658IAjQjJGS28grdx", "pre"),
-    ("densenet169_256x256", "1vCsX12pMZxBmuGGNVnjFFiZ-5u5vD-h6", "pre"),
-    ("densenet121_512x512", "1o0ok-6I2hY1ygSWdZOKmSD84FsEpgDaa", "pre"),
+    ("feature_samples.zip", "1lJgzZoHFu6HI4JBktkGY3qMk--28IUkC", "aux"),
+    ("seresnext101_256.zip", "18Py5eW1E4hSbTT6658IAjQjJGS28grdx", "pre"),
+    ("densenet169_256.zip", "1vCsX12pMZxBmuGGNVnjFFiZ-5u5vD-h6", "pre"),
+    ("densenet121_512.zip", "1o0ok-6I2hY1ygSWdZOKmSD84FsEpgDaa", "pre"),
 ]
 
 
