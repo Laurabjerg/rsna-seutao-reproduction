@@ -2,7 +2,6 @@ import torch.nn.functional as F
 import torch.nn as nn
 import numpy as np
 import torch
-from torch.autograd import Variable
 
 class FocalLoss(nn.Module):
     def __init__(self, gamma=2):
@@ -35,7 +34,7 @@ class BinaryEntropyLoss_weight(nn.Module):
 
         self.weight = torch.cuda.FloatTensor(self.class_num.repeat(target.shape[0], axis=0))
 
-        loss = F.binary_cross_entropy(input, target, self.weight, self.size_average)
+        loss = F.binary_cross_entropy(input, target, weight=self.weight, reduction='mean' if self.size_average else 'sum')
 
         return loss
 
@@ -88,8 +87,8 @@ class BinaryEntropyLoss_weight_v2(nn.Module):
             # self.weight = torch.FloatTensor(self.weight).cuda()
 
         # loss_f = nn.BCELoss()
-        loss = F.binary_cross_entropy(F.sigmoid(input), target, self.weight,self.size_average)
-        # loss = F.binary_cross_entropy_with_logits(input, target, self.weight, reduce=False)
+        loss = F.binary_cross_entropy(torch.sigmoid(input), target, weight=self.weight, reduction='mean' if self.size_average else 'sum')
+        # loss = F.binary_cross_entropy_with_logits(input, target, self.weight, reduction='none')
         # value, index= loss.topk(int(target.shape[1] * OHEM_percent), dim=1, largest=True, sorted=True)
         # return value.mean()
         return loss
@@ -119,9 +118,9 @@ class BinaryEntropyLoss_weight_v2_topk(nn.Module):
             self.weight[self.weight==1] = weights_list[1]
             # self.weight = torch.FloatTensor(self.weight).cuda()
 
-        # loss = F.binary_cross_entropy(F.sigmoid(input), target, self.weight,self.size_average)
+        # loss = F.binary_cross_entropy(torch.sigmoid(input), target, self.weight,self.size_average)
         
-        loss = F.binary_cross_entropy_with_logits(input, target, self.weight, reduce=False)
+        loss = F.binary_cross_entropy_with_logits(input, target, self.weight, reduction='none')
         loss = loss.view(loss.size(0), -1)
         value, index= loss.topk(int(target.shape[1] * target.shape[2] * self.OHEM_percent), dim=1, largest=True, sorted=True)
         return value.mean()
@@ -134,7 +133,7 @@ class SoftDiceLoss_binary_v2(nn.Module):
     def forward(self, input, target):
         smooth = 0.01
         batch_size = input.size(0)
-        input = F.sigmoid(input).view(batch_size, -1)
+        input = torch.sigmoid(input).view(batch_size, -1)
         # print(target.shape)
         # print(target.view(-1))
         target = target.clone().view(batch_size, -1)
@@ -173,7 +172,7 @@ class SoftDiceLoss_binary_v3(nn.Module):
     def forward(self, input, target):
         smooth = 0.01
         batch_size = input.size(0)
-        input = F.sigmoid(input).view(batch_size, -1)
+        input = torch.sigmoid(input).view(batch_size, -1)
         # print(target.shape)
         # print(target.view(-1))
         target = target.clone().view(batch_size, -1)
@@ -212,7 +211,7 @@ class SoftDiceLoss_binary(nn.Module):
     def forward(self, input, target):
         smooth = 0.01
         batch_size = input.size(0)
-        input = F.sigmoid(input).view(batch_size, -1)
+        input = torch.sigmoid(input).view(batch_size, -1)
         # print(target.shape)
         # print(target.view(-1))
         target = target.clone().view(batch_size, -1)
@@ -232,7 +231,7 @@ class SoftDiceLoss(nn.Module):
     def forward(self, logits, targets):
         smooth = 1
         num = targets.size(0)
-        probs = F.sigmoid(logits)
+        probs = torch.sigmoid(logits)
         m1 = probs.view(num, -1)
         m2 = targets.view(num, -1)
         intersection = (m1 * m2)
@@ -246,7 +245,6 @@ Maxim Berman 2018 ESAT-PSI KU Leuven (MIT License)
 """
 
 import torch
-from torch.autograd import Variable
 import torch.nn.functional as F
 import numpy as np
 try:

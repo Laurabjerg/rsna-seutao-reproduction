@@ -24,7 +24,7 @@ def l2_norm(input, axis=1):
 class se_resnext50_32x4d(nn.Module):
     def __init__(self):
         super(se_resnext50_32x4d, self).__init__()
-        self.model_ft = pretrainedmodels.__dict__['se_resnext50_32x4d'](num_classes=1000, pretrained='imagenet')
+        self.model_ft = pretrainedmodels.__dict__['se_resnext50_32x4d'](num_classes=1000, pretrained=None)
         num_ftrs = self.model_ft.last_linear.in_features
         self.model_ft.avg_pool = nn.AdaptiveAvgPool2d((1,1))
         self.model_ft.last_linear = nn.Sequential(nn.Linear(num_ftrs, 6, bias=True))
@@ -36,7 +36,7 @@ class se_resnext50_32x4d(nn.Module):
 class se_resnext101_32x4d(nn.Module):
     def __init__(self):
         super(se_resnext101_32x4d, self).__init__()
-        self.model_ft = pretrainedmodels.__dict__['se_resnext101_32x4d'](num_classes=1000, pretrained='imagenet')
+        self.model_ft = pretrainedmodels.__dict__['se_resnext101_32x4d'](num_classes=1000, pretrained=None)
         num_ftrs = self.model_ft.last_linear.in_features
         self.model_ft.avg_pool = nn.AdaptiveAvgPool2d((1,1))
         self.model_ft.last_linear = nn.Sequential(nn.Linear(num_ftrs, 6, bias=True))
@@ -48,7 +48,7 @@ class se_resnext101_32x4d(nn.Module):
 class DenseNet169_change_avg(nn.Module):
     def __init__(self):
         super(DenseNet169_change_avg, self).__init__()
-        self.densenet169 = torchvision.models.densenet169(pretrained=True).features
+        self.densenet169 = torchvision.models.densenet169(weights='IMAGENET1K_V1').features
         self.avgpool = nn.AdaptiveAvgPool2d(1)  
         self.relu = nn.ReLU()
         self.mlp = nn.Linear(1664, 6)
@@ -66,7 +66,7 @@ class DenseNet169_change_avg(nn.Module):
 class DenseNet121_change_avg(nn.Module):
     def __init__(self):
         super(DenseNet121_change_avg, self).__init__()
-        self.densenet121 = torchvision.models.densenet121(pretrained=True).features
+        self.densenet121 = torchvision.models.densenet121(weights='IMAGENET1K_V1').features
         self.avgpool = nn.AdaptiveAvgPool2d(1)  
         self.relu = nn.ReLU()
         self.mlp = nn.Linear(1024, 6)

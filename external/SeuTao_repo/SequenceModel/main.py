@@ -21,7 +21,7 @@ def bce_loss(input, target, OHEM_percent=None, class_num = None):
         loss = F.binary_cross_entropy_with_logits(input, target, reduction='mean')
         return loss
     else:
-        loss = F.binary_cross_entropy_with_logits(input, target, reduce=False)
+        loss = F.binary_cross_entropy_with_logits(input, target, reduction='none')
         value, index= loss.topk(int(class_num * OHEM_percent), dim=1, largest=True, sorted=True)
         return value.mean()
 
@@ -135,7 +135,7 @@ def valid():
                               Add_position=Add_position).cuda()
 
         print('fold ' + str(s_fold))
-        model.load_state_dict(torch.load(os.path.join(model_save_dir,'fold_'+str(s_fold) + '.pt')))
+        model.load_state_dict(torch.load(os.path.join(model_save_dir,'fold_'+str(s_fold) + '.pt'), weights_only=False))
         model.eval()
         for fea, data, labels in tqdm(val_loader, position=0):
             fea, data, labels = fea.float().cuda(), data.float().cuda(), labels.float().cuda()
@@ -170,7 +170,7 @@ def valid():
                               Add_position=Add_position).cuda()
 
         print('fold ' + str(s_fold))
-        model.load_state_dict(torch.load(os.path.join(model_save_dir, 'fold_' + str(s_fold) + '.pt')))
+        model.load_state_dict(torch.load(os.path.join(model_save_dir, 'fold_' + str(s_fold) + '.pt'), weights_only=False))
         model.eval()
         for fea, data, labels in tqdm(val_loader, position=0):
             fea, data, labels = fea.float().cuda(), data.float().cuda(), labels.float().cuda()
@@ -230,7 +230,7 @@ def inference():
                               Add_position=Add_position).cuda()
 
         print('fold ' + str(s_fold))
-        model.load_state_dict(torch.load(os.path.join(model_save_dir,'fold_'+str(s_fold) + '.pt')))
+        model.load_state_dict(torch.load(os.path.join(model_save_dir,'fold_'+str(s_fold) + '.pt'), weights_only=False))
         model.eval()
 
         filenames_list = []
@@ -273,7 +273,7 @@ def inference():
                               Add_position=Add_position).cuda()
 
         print('fold ' + str(s_fold))
-        model.load_state_dict(torch.load(os.path.join(model_save_dir,'fold_'+str(s_fold) + '.pt')))
+        model.load_state_dict(torch.load(os.path.join(model_save_dir,'fold_'+str(s_fold) + '.pt'), weights_only=False))
         model.eval()
 
         filenames_list = []

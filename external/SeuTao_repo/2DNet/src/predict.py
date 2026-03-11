@@ -272,10 +272,10 @@ def predict(model, name_list, df_all, df_test, batch_size: int, n_test_aug: int,
 
     features_list = {}
     for names, inputs, labels in tqdm(loader, desc='Predict'):
-        labels = labels.view(-1, 6).contiguous().cuda(async=True)
+        labels = labels.view(-1, 6).contiguous().cuda(non_blocking=True)
         all_truth = torch.cat((all_truth, labels), 0)
         with torch.no_grad():
-            inputs = torch.autograd.variable(inputs).cuda(async=True)
+            inputs = inputs.cuda(non_blocking=True)
 
         if backbone == 'DenseNet121_change_avg':
             feature = model.module.densenet121(inputs)      
@@ -380,7 +380,7 @@ def predict_all(model_name, image_size):
         model = eval(model_name+'()')
         model = nn.DataParallel(model).cuda()
 
-        state = torch.load(model_snapshot_path + 'model_epoch_best_{fold}.pth'.format(fold=fold))
+        state = torch.load(model_snapshot_path + 'model_epoch_best_{fold}.pth'.format(fold=fold), map_location='cuda:0', weights_only=False)
 
         epoch = state['epoch']
         best_valid_loss = state['valLoss']

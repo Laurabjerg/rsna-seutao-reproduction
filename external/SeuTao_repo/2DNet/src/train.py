@@ -47,8 +47,8 @@ def epochVal(model, dataLoader, loss_cls, c_val, val_batch_size):
         print(str(i) + '/' + str(int(len(c_val)/val_batch_size)) + '     ' + str((time.time()-ss_time)/(i+1)), end='\r')
         target = target.view(-1, 6).contiguous().cuda()
         outGT = torch.cat((outGT, target), 0)
-        varInput = torch.autograd.Variable(input)
-        varTarget = torch.autograd.Variable(target.contiguous().cuda())
+        varInput = input
+        varTarget = target.contiguous().cuda()
         varOutput = model(varInput)
         lossvalue = loss_cls(varOutput, varTarget)
         valLoss = valLoss + lossvalue.item()
@@ -140,9 +140,9 @@ def train(model_name, image_size):
                     ss_time = time.time()
 
                 print(str(batchID) + '/' + str(int(len(c_train)/train_batch_size)) + '     ' + str((time.time()-ss_time)/(batchID+1)), end='\r')
-                varInput = torch.autograd.Variable(input)
+                varInput = input
                 target = target.view(-1, 6).contiguous().cuda()
-                varTarget = torch.autograd.Variable(target.contiguous().cuda())
+                varTarget = target.contiguous().cuda()
                 varOutput = model(varInput)
                 lossvalue = loss_cls(varOutput, varTarget)
                 trainLoss = trainLoss + lossvalue.item()
@@ -233,7 +233,7 @@ def valid_snapshot(model_name, image_size):
 
         if ckpt is not None:
             print(ckpt)
-            model.load_state_dict(torch.load(ckpt, map_location=lambda storage, loc: storage)["state_dict"])
+            model.load_state_dict(torch.load(ckpt, map_location=lambda storage, loc: storage, weights_only=False)["state_dict"])
 
         valLoss, auc, loss_list, loss_sum = epochVal(model, val_loader, loss_cls, c_val, val_batch_size)
 
