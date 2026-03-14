@@ -41,9 +41,8 @@ required_keys = [
     "DOWNLOAD_DIR",
     "PRETRAIN_DIR",
     "AUX_DATA_DIR",
-    "RSNA_STAGE1_TRAIN_DIR",
-    "RSNA_STAGE1_TEST_DIR",
-    "RSNA_STAGE2_TEST_DIR",
+    "RSNA_TRAIN_DIR",
+    "RSNA_TEST_DIR",
 ]
 
 for key in required_keys:
@@ -67,7 +66,7 @@ for p in must_exist:
         raise FileNotFoundError(f"Mangler repo-fil: {p}")
 
 # --- Tjek DICOM-data (kun warning, ikke fejl – downloades af pipeline) ---
-for key in ["RSNA_STAGE1_TRAIN_DIR", "RSNA_STAGE1_TEST_DIR", "RSNA_STAGE2_TEST_DIR"]:
+for key in ["RSNA_TRAIN_DIR", "RSNA_TEST_DIR"]:
     p = Path(env[key])
     if not p.exists():
         print(f"[WARN] DICOM-mappe mangler: {p}")
