@@ -36,6 +36,7 @@ def main():
         print('gdown mangler. Installer miljøet først.', file=sys.stderr)
         raise
 
+    failed = []
     for name, file_id, target_type in FILES:
         target_dir = pretrained_root if target_type == 'pre' else download_root
         out_path = target_dir / name
@@ -43,7 +44,18 @@ def main():
             print(f'Skipper {out_path} (findes allerede)')
             continue
         url = f'https://drive.google.com/uc?id={file_id}'
-        run(['python', '-m', 'gdown', '--fuzzy', url, '-O', str(out_path)])
+        try:
+            run(['python', '-m', 'gdown', '--fuzzy', url, '-O', str(out_path)])
+        except subprocess.CalledProcessError:
+            print(f'[warn] Kunne ikke downloade {name} – springer over.', file=sys.stderr)
+            # Fjern evt. tom fil efterladt af gdown
+            if out_path.exists() and out_path.stat().st_size == 0:
+                out_path.unlink()
+            failed.append(name)
+
+    if failed:
+        print(f'\n[advarsel] Følgende filer kunne ikke downloades: {", ".join(failed)}')
+        print('Du kan prøve at downloade dem manuelt fra Google Drive.')
 
 
 if __name__ == '__main__':
