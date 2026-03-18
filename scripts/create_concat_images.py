@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 def build_concat(df: pd.DataFrame, png_dir: Path, out_dir: Path):
     out_dir.mkdir(parents=True, exist_ok=True)
+    skipped = 0
 
     for study, sdf in tqdm(df.groupby("study_instance_uid"), desc=f"build {out_dir.name}"):
         sdf = sdf.copy()
@@ -23,7 +24,8 @@ def build_concat(df: pd.DataFrame, png_dir: Path, out_dir: Path):
             img_next = cv2.imread(str(png_dir / next_f), 0)
 
             if img_prev is None or img_cur is None or img_next is None:
-                raise FileNotFoundError(f"Mangler PNG omkring {fname}")
+                skipped += 1
+                continue
 
             img_prev = cv2.resize(img_prev, (512, 512))
             img_cur = cv2.resize(img_cur, (512, 512))
@@ -32,6 +34,9 @@ def build_concat(df: pd.DataFrame, png_dir: Path, out_dir: Path):
             merged = cv2.merge([img_prev, img_cur, img_next])
             merged = cv2.resize(merged, (256, 256))
             cv2.imwrite(str(out_dir / fname), merged)
+
+    if skipped:
+        print(f"  ⚠ Skipped {skipped} slices due to missing PNGs in {out_dir.name}")
 
 def load_config():
     """Load config.env and expand variables."""
