@@ -11,7 +11,11 @@ def build_concat(df: pd.DataFrame, png_dir: Path, out_dir: Path):
 
     for study, sdf in tqdm(df.groupby("study_instance_uid"), desc=f"build {out_dir.name}"):
         sdf = sdf.copy()
-        sdf["slice_num"] = sdf["slice_id"].astype(str).str.split("_").str[-1].astype(int)
+        if "slice_id" in sdf.columns:
+            sdf["slice_num"] = sdf["slice_id"].astype(str).str.split("_").str[-1].astype(int)
+        else:
+            # stage2_test_cls.csv lacks slice_id; use image_position (z-coord) instead
+            sdf["slice_num"] = pd.to_numeric(sdf["image_position"], errors="coerce").fillna(0)
         sdf = sdf.sort_values("slice_num").reset_index(drop=True)
 
         files = sdf["filename"].tolist()
