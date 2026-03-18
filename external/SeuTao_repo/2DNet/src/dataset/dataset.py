@@ -7,6 +7,12 @@ import random
 import math
 from settings import train_png_dir
 
+def _safe_imread(path, size=512):
+    img = cv2.imread(path, 0)
+    if img is None:
+        return np.zeros((size, size), dtype=np.uint8)
+    return cv2.resize(img, (size, size))
+
 def generate_transforms(image_size):
     IMAGENET_SIZE = image_size
 
@@ -66,12 +72,9 @@ class RSNA_Dataset_train_by_study_context(data.Dataset):
             slice_id_down = study_name + '_' + str(study_index-1)
             filename_down = study_train_df[study_train_df['slice_id']==slice_id_down]['filename'].values[0]
 
-        image = cv2.imread(train_png_dir + filename, 0)
-        image = cv2.resize(image, (512, 512))
-        image_up = cv2.imread(train_png_dir + filename_up, 0)
-        image_up = cv2.resize(image_up, (512, 512))
-        image_down = cv2.imread(train_png_dir + filename_down, 0)
-        image_down = cv2.resize(image_down, (512, 512))
+        image = _safe_imread(train_png_dir + filename)
+        image_up = _safe_imread(train_png_dir + filename_up)
+        image_down = _safe_imread(train_png_dir + filename_down)
 
         image_cat = np.concatenate([image_up[:,:,np.newaxis], image[:,:,np.newaxis], image_down[:,:,np.newaxis]],2)
         label = torch.FloatTensor(study_train_df[study_train_df['filename']==filename].loc[:, 'any': 'subdural'].values)
@@ -124,12 +127,9 @@ class RSNA_Dataset_val_by_study_context(data.Dataset):
             slice_id_down = study_name + '_' + str(study_index-1)
             filename_down = study_train_df[study_train_df['slice_id']==slice_id_down]['filename'].values[0]
 
-        image = cv2.imread(train_png_dir + filename, 0)
-        image = cv2.resize(image, (512, 512))
-        image_up = cv2.imread(train_png_dir + filename_up, 0)
-        image_up = cv2.resize(image_up, (512, 512))
-        image_down = cv2.imread(train_png_dir + filename_down, 0)
-        image_down = cv2.resize(image_down, (512, 512))
+        image = _safe_imread(train_png_dir + filename)
+        image_up = _safe_imread(train_png_dir + filename_up)
+        image_down = _safe_imread(train_png_dir + filename_down)
 
         image_cat = np.concatenate([image_up[:,:,np.newaxis], image[:,:,np.newaxis], image_down[:,:,np.newaxis]],2)
         label = torch.FloatTensor(study_train_df[study_train_df['filename']==filename].loc[:, 'any':'subdural'].values)
