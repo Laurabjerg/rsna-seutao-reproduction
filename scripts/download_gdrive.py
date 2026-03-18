@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import argparse
 from pathlib import Path
-import subprocess
 import sys
 
 FILES = [
@@ -12,11 +11,6 @@ FILES = [
     ("densenet169_256.zip", "1vCsX12pMZxBmuGGNVnjFFiZ-5u5vD-h6", "pre"),
     ("densenet121_512.zip", "1o0ok-6I2hY1ygSWdZOKmSD84FsEpgDaa", "pre"),
 ]
-
-
-def run(cmd):
-    print(" ".join(cmd))
-    subprocess.run(cmd, check=True)
 
 
 def main():
@@ -31,7 +25,7 @@ def main():
     pretrained_root.mkdir(parents=True, exist_ok=True)
 
     try:
-        import gdown  # noqa: F401
+        import gdown
     except Exception:
         print('gdown mangler. Installer miljøet først.', file=sys.stderr)
         raise
@@ -44,18 +38,26 @@ def main():
             print(f'Skipper {out_path} (findes allerede)')
             continue
         url = f'https://drive.google.com/uc?id={file_id}'
+        print(f'Downloader {name} ...')
         try:
-            run(['python', '-m', 'gdown', '--fuzzy', url, '-O', str(out_path)])
-        except subprocess.CalledProcessError:
-            print(f'[warn] Kunne ikke downloade {name} – springer over.', file=sys.stderr)
-            # Fjern evt. tom fil efterladt af gdown
+            result = gdown.download(url, str(out_path), quiet=False, fuzzy=True)
+            if result is None:
+                raise RuntimeError('gdown returnerede None')
+        except Exception as e:
+            print(f'[warn] Kunne ikke downloade {name} med gdown API: {e}', file=sys.stderr)
+            # Fjern evt. tom/ufuldstændig fil
             if out_path.exists() and out_path.stat().st_size == 0:
                 out_path.unlink()
             failed.append(name)
 
     if failed:
         print(f'\n[advarsel] Følgende filer kunne ikke downloades: {", ".join(failed)}')
-        print('Du kan prøve at downloade dem manuelt fra Google Drive.')
+        print('Download dem manuelt fra Google Drive:')
+        for name, file_id, target_type in FILES:
+            if name in failed:
+                target_dir = pretrained_root if target_type == 'pre' else download_root
+                print(f'  https://drive.google.com/uc?id={file_id}&export=download')
+                print(f'    -> {target_dir / name}')
 
 
 if __name__ == '__main__':
