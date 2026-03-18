@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.metrics.ranking import roc_auc_score
+from sklearn.metrics import roc_auc_score
 import torch
 from sklearn.metrics import fbeta_score
 import time

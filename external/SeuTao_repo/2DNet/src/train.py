@@ -5,7 +5,7 @@ import gc
 import cv2
 import csv
 import random
-from sklearn.metrics.ranking import roc_auc_score
+from sklearn.metrics import roc_auc_score
 import torch
 import torch.nn as nn
 import torch.nn.parallel
