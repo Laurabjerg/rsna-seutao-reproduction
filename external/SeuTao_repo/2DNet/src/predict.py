@@ -10,6 +10,7 @@ import csv
 from torch.utils.data import DataLoader
 from dataset.dataset import *
 from tuils.tools import *
+from net.models import *
 from settings import concat_train_dir, concat_test_dir
 from tqdm import tqdm
 import torch.nn as nn
