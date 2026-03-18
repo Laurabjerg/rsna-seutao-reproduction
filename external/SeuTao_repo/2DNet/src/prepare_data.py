@@ -40,7 +40,7 @@ def get_metadata_from_dicom(img_dicom):
     return {k: get_first_of_dicom_field_as_int(v) for k, v in metadata.items()}
 
 def window_image(img, window_center, window_width, intercept, slope):
-    img = img * slope + intercept
+    img = img.astype(np.float64) * slope + intercept
     img_min = window_center - window_width // 2
     img_max = window_center + window_width // 2
     img[img < img_min] = img_min
