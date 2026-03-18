@@ -64,7 +64,7 @@ def prepare_image(img_path):
     metadata = get_metadata_from_dicom(img_dicom)
     img = window_image(img_dicom.pixel_array, **metadata)
     img = normalize_minmax(img) * 255
-    img = PIL.Image.fromarray(img.astype(np.int8), mode="L")
+    img = PIL.Image.fromarray(img.astype(np.uint8))
     return img_id, img
 
 def prepare_and_save(img_path, subfolder):
@@ -75,8 +75,8 @@ def prepare_and_save(img_path, subfolder):
         # Rais interrupt exception so we can stop the cell execution
         # without shutting down the kernel.
         raise
-    except:
-        l.error('Error processing the image: {'+img_path+'}')
+    except Exception as e:
+        l.error(f'Error processing {img_path}: {e}')
 
 def prepare_images(imgs_path, subfolder):
     for i in tqdm.tqdm(imgs_path):
