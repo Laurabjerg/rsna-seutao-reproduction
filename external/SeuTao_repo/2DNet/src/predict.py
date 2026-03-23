@@ -355,7 +355,7 @@ def group_aug(val_p_aug, val_names_aug, val_truth_aug):
     g_truth = g_truth.reset_index()
     g_truth = g_truth.sort_values(by='id')
 
-    return g_prob.drop('id', 1).values, g_truth['id'].values, g_truth.drop('id', 1).values
+    return g_prob.drop(columns='id').values, g_truth['id'].values, g_truth.drop(columns='id').values
 
 
 def predict_all(model_name, image_size):
