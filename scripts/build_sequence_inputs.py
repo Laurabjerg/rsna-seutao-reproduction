@@ -58,7 +58,7 @@ def main():
     test_names = load_test_names(csv_root)
 
     for model_name in MODELS:
-        pred_dir = repo_root / "2DNet" / model_name / "prediction"
+        pred_dir = repo_root / "2DNet" / "src" / "data_test" / model_name / "prediction"
         if not pred_dir.exists():
             raise FileNotFoundError(f"Mangler prediction-dir: {pred_dir}")
 

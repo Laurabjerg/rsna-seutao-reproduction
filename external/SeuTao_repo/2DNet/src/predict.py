@@ -195,12 +195,12 @@ class PredictionDatasetPure:
     def __getitem__(self, idx):
         if self.mode == 'val':
             filename = self.name_list[idx % len(self.name_list)]
-            image_cat = cv2.imread('/home1/kaggle_rsna2019/process/train_concat_3images_256/' + filename)
+            image_cat = cv2.imread(concat_train_dir + filename)
             label = torch.FloatTensor(self.df[self.df['filename']==filename].loc[:, 'any':'subdural'].values)
 
         if self.mode == 'test':
             filename = self.name_list[idx % len(self.name_list)]
-            image_cat = cv2.imread('/home1/kaggle_rsna2019/process/stage2_test_concat_3images/' + filename)
+            image_cat = cv2.imread(concat_test_dir + filename)
             image_cat = cv2.resize(image_cat, (256, 256))
             label = torch.FloatTensor([0,0,0,0,0,0])
 
@@ -225,12 +225,12 @@ class PredictionDatasetAug:
     def __getitem__(self, idx):
         if self.mode == 'val':
             filename = self.name_list[idx % len(self.name_list)]
-            image_cat = cv2.imread('/home1/kaggle_rsna2019/process/train_concat_3images_256/' + filename)
+            image_cat = cv2.imread(concat_train_dir + filename)
             image_cat = cv2.resize(image_cat, (256, 256))
             label = torch.FloatTensor(self.df[self.df['filename']==filename].loc[:, 'any':'subdural'].values)
         if self.mode == 'test':
             filename = self.name_list[idx % len(self.name_list)]
-            image_cat = cv2.imread('/home1/kaggle_rsna2019/process/stage2_test_concat_3images/' + filename)
+            image_cat = cv2.imread(concat_test_dir + filename)
             image_cat = cv2.resize(image_cat, (256, 256))
             label = torch.FloatTensor([0,0,0,0,0,0])
 
