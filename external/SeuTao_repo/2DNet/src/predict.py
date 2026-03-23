@@ -360,7 +360,7 @@ def group_aug(val_p_aug, val_names_aug, val_truth_aug):
 
 def predict_all(model_name, image_size):
 
-    for fold in [0,1,2,3,4]:
+    for fold in [1,2,3,4]:
 
         print(fold)
         
